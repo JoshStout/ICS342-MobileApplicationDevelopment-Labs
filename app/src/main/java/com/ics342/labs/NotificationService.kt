@@ -4,18 +4,19 @@ import android.Manifest.permission
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import java.util.UUID
 
 class NotificationService: Service() {
 
-    private val notificationManager: NotificationManagerCompat =
-        NotificationManagerCompat.from(this)
+//    private val notificationManager: NotificationManagerCompat =
+//         NotificationManagerCompat.from(this)
 
     override fun onCreate() {
         super.onCreate()
@@ -34,9 +35,19 @@ class NotificationService: Service() {
             return START_NOT_STICKY
         }
 
-       // Build notification
+        // Build notification
+        var builder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.star)
+            .setContentTitle("title")
+            .setContentText("content")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
-        TODO("Build and show notification")
+        // ("Build and show notification")
+        with(NotificationManagerCompat.from(this)) {
+            // notificationId is a unique int for each notification that you must define
+            notify(NOTIFICATION_ID, builder.build())
+        }
+
         return START_STICKY_COMPATIBILITY
     }
 
@@ -46,7 +57,20 @@ class NotificationService: Service() {
     }
 
     private fun createNotificationChannel() {
-        TODO("Create notification channel and register with the system")
+        // ("Create notification channel and register with the system")
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "name"
+            val descriptionText = "description text"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system
+            val notificationManager : NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 
     companion object {
